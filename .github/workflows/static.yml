@@ -1,5 +1,5 @@
 i# Simple workflow for deploying static content to GitHub Pages
-name: Deploy static content to Pages
+name:Deploy static content to Pages
 
 on:
   # Runs on pushes targeting the default branch
@@ -12,7 +12,7 @@ on:
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
-  pages: write
+  pages: write7
   id-token: write
 
 # Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
