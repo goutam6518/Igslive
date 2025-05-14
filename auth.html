@@ -3,232 +3,241 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Firebase Auth Example</title>
+    <title>Login & Sign Up</title>
     <style>
         body {
             font-family: sans-serif;
+            background-color: #f4f4f4;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
-            gap: 20px;
-            padding: 20px;
+            min-height: 100vh;
+            margin: 0;
         }
-        .form-container {
-            border: 1px solid #ccc;
-            padding: 20px;
+
+        .container {
+            background-color: white;
+            padding: 40px;
             border-radius: 8px;
-            width: 300px;
-            box-sizing: border-box;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            max-width: 90%;
         }
+
         h2 {
             text-align: center;
-            margin-bottom: 15px;
+            color: #333;
+            margin-bottom: 30px;
         }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
         label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: bold;
         }
+
         input[type="email"],
         input[type="password"] {
-            width: 100%;
-            padding: 8px;
-            margin-bottom: 10px;
+            width: calc(100% - 16px);
+            padding: 10px;
             border: 1px solid #ddd;
             border-radius: 4px;
             box-sizing: border-box;
+            font-size: 16px;
         }
+
         button {
-            width: 100%;
-            padding: 10px;
             background-color: #007bff;
             color: white;
+            padding: 12px 20px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            transition: background-color 0.3s ease;
         }
+
         button:hover {
             background-color: #0056b3;
         }
-        #signout-container {
+
+        .form-switch {
+            text-align: center;
             margin-top: 20px;
+            color: #777;
+        }
+
+        .form-switch a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .form-switch a:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            color: red;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        #signup-form,
+        #login-form {
+            display: block; /* Initially show both, JavaScript will handle toggling */
+        }
+
+        #toggle-signup,
+        #toggle-login {
+            background: none;
+            border: none;
+            color: #007bff;
+            cursor: pointer;
+            padding: 0;
+            font-weight: bold;
+        }
+
+        #toggle-signup:hover,
+        #toggle-login:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
 
-    <div class="form-container">
-        <h2>Sign Up</h2>
-        <form id="signupForm">
-            <div>
-                <label for="signupEmail">Email:</label>
-                <input type="email" id="signupEmail" name="signupEmail" required>
-            </div>
-            <div>
-                <label for="signupPassword">Password:</label>
-                <input type="password" id="signupPassword" name="signupPassword" required>
-            </div>
-            <button type="submit">Sign Up</button>
-        </form>
-    </div>
-
-    <div class="form-container">
-        <h2>Login</h2>
-        <form id="loginForm">
-            <div>
+    <div class="container">
+        <div id="login-form">
+            <h2>Login</h2>
+            <div class="form-group">
                 <label for="loginEmail">Email:</label>
                 <input type="email" id="loginEmail" name="loginEmail" required>
             </div>
-            <div>
+            <div class="form-group">
                 <label for="loginPassword">Password:</label>
                 <input type="password" id="loginPassword" name="loginPassword" required>
             </div>
-            <button type="submit">Login</button>
-        </form>
-    </div>
+            <button onclick="loginWithFirebase()">Login</button>
+            <div class="form-switch">
+                Don't have an account? <button id="toggle-signup">Sign Up</button>
+            </div>
+            <p id="loginError" class="error-message"></p>
+        </div>
 
-    <div id="signout-container">
-        <button id="signOutButton">Sign Out</button>
-        <p id="authStatus">Checking authentication...</p>
+        <div id="signup-form" style="display: none;">
+            <h2>Sign Up</h2>
+            <div class="form-group">
+                <label for="signupEmail">Email:</label>
+                <input type="email" id="signupEmail" name="signupEmail" required>
+            </div>
+            <div class="form-group">
+                <label for="signupPassword">Password:</label>
+                <input type="password" id="signupPassword" name="signupPassword" required>
+            </div>
+            <button onclick="signUpWithFirebase()">Sign Up</button>
+            <div class="form-switch">
+                Already have an account? <button id="toggle-login">Login</button>
+            </div>
+            <p id="signupError" class="error-message"></p>
+        </div>
     </div>
 
     <script type="module">
-        // Import Firebase modules (ensure these match your JavaScript script)
+        // Import Firebase modules
         import { initializeApp } from 'firebase/app';
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
 
         // Replace with your Firebase project configuration
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_AUTH_DOMAIN",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_STORAGE_BUCKET",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID"
+            apiKey: "AIzaSyCRtPZ34Y1J-p5b7FJxEUagYg3h_D6PbhM",
+    authDomain: "igsfogstudio-df541.firebaseapp.com",
+    projectId: "igsfogstudio-df541",
+    storageBucket: "igsfogstudio-df541.firebasestorage.app",
+    messagingSenderId: "206722625476",
+    appId: "1:206722625476:web:9ab922dc4853418af57e91",
+    measurementId: "G-71VB7K6QS6"
         };
 
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
 
-        // --- Sign Up Functionality ---
+        const loginForm = document.getElementById('login-form');
+        const signupForm = document.getElementById('signup-form');
+        const toggleSignupButton = document.getElementById('toggle-signup');
+        const toggleLoginButton = document.getElementById('toggle-login');
+        const loginErrorElement = document.getElementById('loginError');
+        const signupErrorElement = document.getElementById('signupError');
 
-        async function signUp(email, password) {
+        toggleSignupButton.addEventListener('click', () => {
+            loginForm.style.display = 'none';
+            signupForm.style.display = 'block';
+            loginErrorElement.textContent = '';
+        });
+
+        toggleLoginButton.addEventListener('click', () => {
+            signupForm.style.display = 'none';
+            loginForm.style.display = 'block';
+            signupErrorElement.textContent = '';
+        });
+
+        window.signUpWithFirebase = async () => {
+            const emailInput = document.getElementById('signupEmail');
+            const passwordInput = document.getElementById('signupPassword');
+            const email = emailInput.value;
+            const password = passwordInput.value;
+
             try {
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
                 console.log('Sign up successful:', user);
-                document.getElementById('authStatus').textContent = `Signed up: ${user.email}`;
-                return user;
+                signupErrorElement.textContent = '';
+                alert('Sign up successful! You can now log in.');
+                // Optionally redirect or update UI
+                signupForm.style.display = 'none';
+                loginForm.style.display = 'block';
             } catch (error) {
-                const errorCode = error.code;
-                const errorMessage = error.message;
-                console.error('Sign up error:', errorCode, errorMessage);
-                alert(`Sign up failed: ${errorMessage}`);
-                throw error;
+                console.error('Sign up error:', error);
+                signupErrorElement.textContent = error.message;
             }
-        }
+        };
 
-        // Example usage for Sign Up
-        document.addEventListener('DOMContentLoaded', () => {
-            const signupForm = document.getElementById('signupForm');
-            if (signupForm) {
-                signupForm.addEventListener('submit', async (event) => {
-                    event.preventDefault();
-                    const emailInput = document.getElementById('signupEmail');
-                    const passwordInput = document.getElementById('signupPassword');
+        window.loginWithFirebase = async () => {
+            const emailInput = document.getElementById('loginEmail');
+            const passwordInput = document.getElementById('loginPassword');
+            const email = emailInput.value;
+            const password = passwordInput.value;
 
-                    if (emailInput && passwordInput) {
-                        const email = emailInput.value;
-                        const password = passwordInput.value;
-
-                        try {
-                            await signUp(email, password);
-                            signupForm.reset();
-                        } catch (error) {
-                            // Error is already handled within the signUp function
-                        }
-                    } else {
-                        console.error('Signup email or password input fields not found.');
-                    }
-                });
-            }
-        });
-
-        // --- Login Functionality ---
-
-        async function login(email, password) {
             try {
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
                 console.log('Login successful:', user);
-                document.getElementById('authStatus').textContent = `Logged in as: ${user.email}`;
-                return user;
+                loginErrorElement.textContent = '';
+                // Optionally redirect to your app's main page
+                window.location.href = '/dashboard.html'; // Example redirect
             } catch (error) {
-                const errorCode = error.code;
-                const errorMessage = error.message;
-                console.error('Login error:', errorCode, errorMessage);
-                alert(`Login failed: ${errorMessage}`);
-                throw error;
+                console.error('Login error:', error);
+                loginErrorElement.textContent = error.message;
             }
-        }
+        };
 
-        // Example usage for Login
-        document.addEventListener('DOMContentLoaded', () => {
-            const loginForm = document.getElementById('loginForm');
-            if (loginForm) {
-                loginForm.addEventListener('submit', async (event) => {
-                    event.preventDefault();
-                    const emailInput = document.getElementById('loginEmail');
-                    const passwordInput = document.getElementById('loginPassword');
-
-                    if (emailInput && passwordInput) {
-                        const email = emailInput.value;
-                        const password = passwordInput.value;
-
-                        try {
-                            await login(email, password);
-                            loginForm.reset();
-                        } catch (error) {
-                            // Error is already handled within the login function
-                        }
-                    } else {
-                        console.error('Login email or password input fields not found.');
-                    }
-                });
-            }
-        });
-
-        // --- Sign Out Functionality ---
-
-        async function signOutUser() {
-            try {
-                await signOut(auth);
-                console.log('Sign out successful');
-                document.getElementById('authStatus').textContent = 'Signed out.';
-            } catch (error) {
-                console.error('Sign out error:', error);
-                alert(`Sign out failed: ${error.message}`);
-            }
-        }
-
-        // Example usage for Sign Out
-        document.addEventListener('DOMContentLoaded', () => {
-            const signOutButton = document.getElementById('signOutButton');
-            if (signOutButton) {
-                signOutButton.addEventListener('click', signOutUser);
-            }
-        });
-
-        // --- Observe Authentication State ---
-
+        // Optional: Observe authentication state for persistent login
         onAuthStateChanged(auth, (user) => {
-            const authStatusElement = document.getElementById('authStatus');
             if (user) {
-                authStatusElement.textContent = `Logged in as: ${user.email}`;
-                // You might want to hide login/signup forms and show app content here
+                // User is signed in, redirect or update UI
+                console.log('User is logged in:', user);
+                // window.location.href = '/dashboard.html'; // Redirect if already logged in
             } else {
-                authStatusElement.textContent = 'No user logged in.';
-                // You might want to show login/signup forms and hide app content here
+                // User is signed out
+                console.log('User is logged out');
+                loginForm.style.display = 'block';
+                signupForm.style.display = 'none';
             }
         });
     </script>
